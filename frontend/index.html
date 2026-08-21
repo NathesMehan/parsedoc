@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>ParseDoc</title>
+    </head>
+    <body>
+        <h1>ParseDoc</h1>
+
+        <h2>Step 1: Upload a Document</h2>
+        <input type="file" id="fileInput">
+        <button onClick="uploadFile()">Upload</button>
+        <p id="uploadStatus"></p>
+
+        <h2>Step 2: Ask a Question</h2>
+        <input type="text" id="promptInput" placeholder="e.g. Summarize this document" style="width: 300px;">
+        <button onclick="submitQuery()">Submit</button>
+
+        <h2>Response</h2>
+        <p id="responseOutput"></p>
+
+        <script>
+            let currentFileId = null;
+
+            async function uploadFile(){
+                const fileInput = document.getElementById("fileInput");
+                const uploadStatus = document.getElementById("uploadStatus");
+
+                if(fileInput.files.length == 0){
+                    uploadStatus.textContent = "Please choose a file first:";
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0])
+
+                uploadStatus.textContent = "Uploading...";
+
+                try{
+                    const res = await fetch("http://localhost:8000/upload",{
+                        method: "POST",
+                        body: formData
+                    });
+                    
+                    if(!res.ok){
+                        const errorData = await res.json();
+                        uploadStatus.textContent = "Error: " + errorData.detail;
+                        return;
+                    }
+
+                    const data = await res.json();
+                    currentFileId = data.file_id;
+                    uploadStatus.textContent = `Uploaded "${data.filename}" (${data.char_count} characters). Ready to query`;
+                }catch(err){
+                    uploadStatus.textContent="Upload failed: " + err.message;
+                }
+            }
+
+            async function submitQuery(){
+                const promptInput = document.getElementById("promptInput");
+                const responseOutput = document.getElementById("responseOutput");
+
+                if(!currentFileId){
+                    responseOutput.textContent = "Upload a document first.";
+                    return;
+                }
+
+                if(!promptInput.value.trim()){
+                    responseOutput.textContent="Enter a prompt first.";
+                    return;
+                }
+
+                responseOutput.textContent="Thinking..."
+
+                try{
+                    const res = await fetch("http://localhost:8000/query",{
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({
+                            file_id: currentFileId,
+                            prompt: promptInput.value
+                        })
+                    });
+
+                    if(!res.ok){
+                        const errorData = await res.json();
+                        responseOutput.textContent="Error: " + errorData.detail;
+                        return;
+                    }
+
+                    const data = await res.json();
+                    responseOutput.textContent = data.response;
+                }catch(err){
+                    responseOutput.textContent = "Query failed: " + err.message;
+                }
+            }
+        </script>
+    </body>
+</html>
