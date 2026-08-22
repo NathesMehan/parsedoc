@@ -3,34 +3,297 @@
     <head>
         <meta charset="UTF-8">
         <title>ParseDoc</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: #eae6da;
+            background: linear-gradient(-45deg, #1a1d29, #24283b, #1f2937, #171a26);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 24px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        header h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 2.6rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        header p {
+            color: #9aa0b4;
+            margin-top: 6px;
+            font-size: 0.95rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        @media (max-width: 800px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+
+.preview-panel {
+    background: #2c2f3d;
+    border-radius: 4px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+    height: 560px;
+    position: relative;
+    transition: height 0.4s ease;
+}
+
+.preview-panel.expanded {
+    height: 900px;
+}
+
+.preview-panel::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #d98e3f, #5eead4);
+    border-radius: 4px 4px 0 0;
+    z-index: 1;
+}
+
+.preview-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.preview-header h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    color: #eae6da;
+}
+
+.preview-filename {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    color: #9aa0b4;
+    margin-top: 4px;
+}
+
+.preview-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+}
+
+.page {
+    background: #fdfcf9;
+    width: 100%;
+    max-width: 480px;
+    min-height: 640px;
+    padding: 56px 48px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    color: #2a2620;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.92rem;
+    line-height: 1.75;
+}
+
+.page p {
+    margin-bottom: 1em;
+}
+
+.preview-scroll::-webkit-scrollbar { width: 8px; }
+.preview-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+}
+
+.preview-empty {
+    color: #a89f8a;
+    font-style: italic;
+}
+
+        .upload-row {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(42,38,32,0.15);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px;
+            padding: 24px;
+            backdrop-filter: blur(6px);
+        }
+
+        .card h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.2rem;
+            margin-bottom: 14px;
+        }
+
+        input[type="text"], input[type="file"] {
+            font-family: 'Inter', sans-serif;
+            padding: 10px 12px;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.04);
+            color: #eae6da;
+            width: 100%;
+        }
+
+        input[type="text"]::placeholder { color: #767c93; }
+
+        .query-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        button {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 3px;
+            background: #d98e3f;
+            color: #1a1d29;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s ease;
+        }
+
+        button:hover { background: #e8a54f; }
+
+        #uploadStatus {
+            font-size: 0.82rem;
+            color: #6b6455;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .response-card {
+            flex: 1;
+            min-height: 220px;
+        }
+
+        #responseOutput {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #d7e8e3;
+            border-left: 3px solid #5eead4;
+            padding-left: 14px;
+            margin-top: 4px;
+        }
+
+        .response-empty {
+            color: #656b7f;
+            font-style: italic;
+            border-left: 3px solid rgba(94,234,212,0.2);
+        }
+
+        #previewFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #525659;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+    </style>
     </head>
     <body>
-        <h1>ParseDoc</h1>
+        <header>
+            <h1>ParseDoc</h1>
+            <h2>Upload a Document. Ask it anything</h2>
+        </header>
 
-        <h2>Step 1: Upload a Document</h2>
-        <input type="file" id="fileInput">
-        <button onClick="uploadFile()">Upload</button>
-        <p id="uploadStatus"></p>
 
-        <h2>Step 2: Ask a Question</h2>
-        <input type="text" id="promptInput" placeholder="e.g. Summarize this document" style="width: 300px;">
-        <button onclick="submitQuery()">Submit</button>
+        <div class="layout">
+        <div class="preview-panel">
+            <div class="preview-header">
+                <h2>Document</h2>
+                <div class="preview-filename" id="previewFilename">No document loaded</div>
+            </div>
+            <div class="preview-scroll" id="previewScroll">
+                <div class="page" id="previewBody">
+                    <span class="preview-empty">Upload a file to see its contents here.</span>
+                </div>
+                <iframe id="previewFrame" style="display:none;"></iframe>
+            </div>
+            <div class="upload-row">
+                <input type="file" id="fileInput">
+                <button onclick="uploadFile()">Upload</button>
+            </div>
+        </div>
 
-        <h2>Response</h2>
-        <p id="responseOutput"></p>
+        <div class="right-column">
+            <div class="card">
+                <h2>Ask a Question</h2>
+                <div class="query-row">
+                    <input type="text" id="promptInput" placeholder="Summarize this document in one sentence">
+                    <button onclick="submitQuery()">Submit</button>
+                </div>
+                <p id="uploadStatus" style="margin-top:10px;"></p>
+            </div>
 
+            <div class="card response-card">
+                <h2>Response</h2>
+                <p id="responseOutput" class="response-empty">Your answer will appear here.</p>
+            </div>
+        </div>
+    </div>
+</div>
         <script>
             let currentFileId = null;
 
             async function uploadFile(){
                 const fileInput = document.getElementById("fileInput");
                 const uploadStatus = document.getElementById("uploadStatus");
+                const previewBody = document.getElementById("previewBody");
+                const previewFrame = document.getElementById("previewFrame")
+                const previewFileName = document.getElementById("previewFilename");
 
                 if(fileInput.files.length == 0){
                     uploadStatus.textContent = "Please choose a file first:";
                     return;
                 }
 
+                const selectedFile = fileInput.files[0];
                 const formData = new FormData();
                 formData.append("file", fileInput.files[0])
 
@@ -51,6 +314,19 @@
                     const data = await res.json();
                     currentFileId = data.file_id;
                     uploadStatus.textContent = `Uploaded "${data.filename}" (${data.char_count} characters). Ready to query`;
+                    previewFileName.textContent = data.filename;
+                    document.querySelector(".preview-panel").classList.add("expanded");
+
+                    if (selectedFile.name.toLowerCase().endsWith(".pdf")) {
+                        const fileUrl = URL.createObjectURL(selectedFile);
+                        previewFrame.src = fileUrl + "#toolbar=0&navpanes=0&view=FitH";
+                        previewFrame.style.display = "block";
+                        previewBody.style.display = "none";
+                    } else {
+                        previewBody.innerHTML = formatDocumentText(data.text);
+                        previewBody.style.display = "block";
+                        previewFrame.style.display = "none";
+                    }
                 }catch(err){
                     uploadStatus.textContent="Upload failed: " + err.message;
                 }
@@ -94,6 +370,27 @@
                     responseOutput.textContent = "Query failed: " + err.message;
                 }
             }
+
+            function formatDocumentText(text) {
+            const normalized = text.replace(/\r\n/g, "\n");
+            let paragraphs = normalized.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+
+            if (paragraphs.length <= 1) {
+                paragraphs = [normalized.replace(/\n+/g, " ").trim()];
+            }
+
+                return paragraphs
+                .map(p => `<p>${escapeHtml(p)}</p>`)
+                .join("");
+            }
+
+            function escapeHtml(str) {
+                return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+            }
         </script>
+        
     </body>
 </html>

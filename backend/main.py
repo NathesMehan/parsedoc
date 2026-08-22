@@ -62,7 +62,7 @@ async def upload_document(file: UploadFile = File(...)):
     file_id = str(uuid.uuid4())
     document_store[file_id] = text
 
-    return{"file_id": file_id, "filename": file.filename, "char_count": len(text)}
+    return{"file_id": file_id, "filename": file.filename, "char_count": len(text), "text": text}
 
 #Function to query Ollama
 def query_ollama(prompt:str, model: str = "llama3.2") -> str:
@@ -71,7 +71,10 @@ def query_ollama(prompt:str, model: str = "llama3.2") -> str:
         json = {
             "model": model,
             "prompt": prompt,
-            "stream": False
+            "stream": False,
+            "options": {
+                "num_predict": 1024
+            }
         }
     )
     response.raise_for_status()
