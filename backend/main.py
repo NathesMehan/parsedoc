@@ -6,6 +6,7 @@ import docx
 import uuid
 import io
 import requests
+import numpy as np
 
 class QueryRequest(BaseModel):
     file_id: str
@@ -21,8 +22,33 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-#In-memory storage: {file_id: extracted_text}
-document_store: dict[str, str] = {}
+document_store: dict[str, dict] = {}
+
+#Function to chunk the text
+def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50)-> list[str]:
+    words = text.split()
+    chunks = []
+    start = 0
+    while start < len(words):
+        end = start + chunk_size
+        chunk = " ".join(words[start:end])
+        chunks.append(chunk)
+        start += chunk_size-overlap
+    return chunks
+
+#Function to get embedding
+def get_embedding(text: str)->list[float]:
+    response = requests.post(
+        "http://localhost:11434/api/embeddings",
+        json={"model": "nomic-embed-text", "prompt": text}
+    )
+    response.raise_for_status()
+    return response.json()["embedding"]
+
+def cosine_similarity(vec1: list[float], vec2: list[float]) -> float:
+    a = np.array(vec1)
+    b = np.array(vec2)
+    return float(np.dot(a,b) / (np.linalg.norm(a) * np.linalg.norm(b)))
 
 #Function to extract text from a PDF document
 def extract_text_from_pdf(file_bytes: bytes) -> str:
@@ -59,10 +85,17 @@ async def upload_document(file: UploadFile = File(...)):
     if not text.strip():
         raise HTTPException(status_code=400, detail = "Could not extract any text from this file.")
 
+    chunks = chunk_text(text)
+    embeddings = [get_embedding(chunk) for chunk in chunks]
+    
     file_id = str(uuid.uuid4())
-    document_store[file_id] = text
+    document_store[file_id] = {
+        "filename": file.filename,
+        "chunks": chunks,
+        "embeddings": embeddings
+    }
 
-    return{"file_id": file_id, "filename": file.filename, "char_count": len(text), "text": text}
+    return{"file_id": file_id, "filename": file.filename, "char_count": len(text), "text": text, "chunk_count": len(chunks)}
 
 #Function to query Ollama
 def query_ollama(prompt:str, model: str = "llama3.2") -> str:
@@ -88,10 +121,24 @@ def query_document(request: QueryRequest):
     if request.file_id not in document_store:
         raise HTTPException(status_code=404, detail = "File not found. Did you upload it first?")
 
-    document_text = document_store[request.file_id]
+    doc = document_store[request.file_id]
+
+    question_embedding = get_embedding(request.prompt)
+
+    similarities = [
+        cosine_similarity(question_embedding, chunk_embedding)
+        for chunk_embedding in doc["embeddings"]
+    ]
+
+    top_n = 3
+    top_indices = np.argsort(similarities)[::-1][:top_n]
+    relevant_chunks = [doc["chunks"][i] for i in top_indices]
+
+    context = "\n\n".join(relevant_chunks)
+
 
     #Construct and send the full prompt to Ollama
-    full_prompt = f"Document:{document_text}\n\nInstruction:{request.prompt}"
+    full_prompt = f"Context from document: {context}\n\nQuestion:{request.prompt}"
     answer = query_ollama(full_prompt)
 
     return {"response": answer}

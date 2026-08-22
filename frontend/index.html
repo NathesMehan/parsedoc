@@ -239,7 +239,7 @@
     <body>
         <header>
             <h1>ParseDoc</h1>
-            <h2>Upload a Document. Ask it anything</h2>
+            <h2>Your Personal Document Assistant</h2>
         </header>
 
 
@@ -313,7 +313,7 @@
 
                     const data = await res.json();
                     currentFileId = data.file_id;
-                    uploadStatus.textContent = `Uploaded "${data.filename}" (${data.char_count} characters). Ready to query`;
+                    uploadStatus.textContent = `Uploaded "${data.filename}" (${data.char_count} characters).`;
                     previewFileName.textContent = data.filename;
                     document.querySelector(".preview-panel").classList.add("expanded");
 
