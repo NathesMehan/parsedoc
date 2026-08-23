@@ -45,29 +45,32 @@ After Uploading Document:
 
 Prerequisites: Python 3.10+, Ollama (https://ollama.com) Installed
 
-```
+
 Bash:
+```
 ollama pull llama3.2
 ollama pull nomic-embed-text
 ```
-```
+
 Clone Repo:
+```
 git clone https://github.com/NathesMehan/parsedoc.git
 cd parsedoc
 ```
-```
+
 Setup Python Envirionment:
+```
 python -m venv venv
 venv\Scripts\activate      # Windows
 source venv/bin/activate   # macOS/Linux
 
 pip install -r requirements.txt
 ```
-```
+
 Start Backend:
+```
 uvicorn backend.main:app --reload
 ```
 
-```
+
 Open frontend/index.html directly in browser and ensure Ollama is running in the background
-```
