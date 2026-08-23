@@ -2,7 +2,7 @@
 
 ## Summary
 
-Parsedoc is a Retrieval Augmented Generation based personal document assistant. The way it works is a user uploads a PDF, DOCX, or TXT document, and it uses RAG by splitting the document into chunks with a slight overlap, each chunk then gets embedded into a vector, and then uses cosine similarity to retrieve the most relevant chunks to the user's question and pass it to the Ollama model as context.
+ParseDoc is a Retrieval Augmented Generation based personal document assistant. The way it works is a user uploads a PDF, DOCX, or TXT document, and it uses RAG by splitting the document into chunks with a slight overlap, each chunk then gets embedded into a vector, and then uses cosine similarity to retrieve the most relevant chunks to the user's question and pass it to the Ollama model as context.
 
 ## Features
 - Allows users to upload PDF, DOCX, and TXT documents
