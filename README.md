@@ -1,1 +1,34 @@
 # parsedoc
+
+## Summary
+
+Parsedoc is a Retrical Augmented Generation based personal document assistant. The way it works is a user uploads a PDF, DOCX, or TXT document, and it uses RAG by splitting the document into chunks with a slight overlap, each chunk then gets embedded into a vector, and then uses cosine similarity to retrieve the most relevant chunks to the user's question and pass it to the Ollama model as context.
+
+## Features
+- Allows users to upload PDF, SOCX, and TXT documents
+- Contains a live document preview with native PDF rendering in-browser for PDF documents, and a formatted reading view for TXT/DOCX documents
+- Allows users to ask questions about the documents
+- Has a RAG pipeline which works as follows: chunking -> local embeddings -> cosine similarity retrieval -> generation of answer
+- Fully local to the user's machine
+
+## Architecture
+Browser (HTML / CSS / JavaScript)
+|
+FastAPI Backend -> Ollama (Chat Model: Llama 3.2)
+| ---------> Ollama (Embedding Model: Nomic-Embed-Text)
+|
+In-Memory Document + Vector Store
+
+
+Upload Flow: file -> text extraction -> chunking (500 words per chunk with 50 word over-lap between chunks) - > embedding each chunk -> store embeddings in memory alongside raw text
+
+Query Flow: question -> embedded -> cosine similarity comparison against stored chunks -> top 3 similar chunks selected -> chunks sent to Ollama along with the question -> response returned
+
+## Techstack
+- Backend: Python, FastAPI, Uvicorn
+- Frontend: Vanilla HTML / CSS / JavaScript
+- LLM / Embeddings: Ollama (Llama 3.2 for generation, Nomic-Embed-Text for embeddings)
+- Document parsing: pypdf, python-docx
+- Similarity Search: Numpy (Cosine Similarity)
+
+## Screenshot
