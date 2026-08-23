@@ -35,10 +35,10 @@ Query Flow: question -> embedded -> cosine similarity comparison against stored 
 
 ## Screenshot
 Landing page:
-![ParseDoc UI](screenshot/screenshot1.png)
+![ParseDoc UI](screenshots/screenshot1.png)
 
 After Uploading Document:
-![ParseDoc UI](screenshot/Screenshot_2.png)
+![ParseDoc UI](screenshots/Screenshot_2.png)
 
 
 ## Local Setup Instructions
